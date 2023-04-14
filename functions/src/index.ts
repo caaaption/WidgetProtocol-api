@@ -1,9 +1,12 @@
-import * as functions from "firebase-functions";
+import express = require('express')
+import * as functions from 'firebase-functions'
 
-// // Start writing functions
-// // https://firebase.google.com/docs/functions/typescript
-//
-// export const helloWorld = functions.https.onRequest((request, response) => {
-//   functions.logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
+const app: express.Express = express()
+
+app.get('/', async (req, res) => {
+  res.status(200).send({
+    message: 'Hello World!',
+  })
+})
+
+exports.api = functions.region('asia-northeast1').https.onRequest(app)
