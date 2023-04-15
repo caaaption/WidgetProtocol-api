@@ -44,6 +44,11 @@ app.get('/lens/image/:address', async (req, res) => {
     })
 })
 
+app.get('/lens/followerInfo/:address', async (req, res) => {
+    const address = req.params.address
+    res.status(200).send(await getLensFollowInfo(address))
+})
+
 
 
 exports.api = functions.region('asia-northeast1').https.onRequest(app)
@@ -84,4 +89,32 @@ async function fetchLensProfileImageByAddress(userAddress: string) {
      );
      const imageInfo = profile?.picture
      return imageInfo
+}
+
+
+async function getLensFollowInfo(userAddress: string) {
+    const lensClient = new LensClient({
+        environment: production
+    });
+    const allOwnedProfiles = await lensClient.profile.fetchAll({
+        ownedBy: [userAddress],
+    });
+    const profileId = allOwnedProfiles.items[0].id;
+    
+    const profile = await lensClient.profile.fetch(
+        {
+            profileId: profileId
+        },
+     );
+
+     const totalFollowers = profile?.stats.totalFollowers
+     const totalFollowing = profile?.stats.totalFollowing
+
+    const followInfo = {
+        totalFollowers: totalFollowers,
+        totalFollowing: totalFollowing
+    }
+
+    return followInfo
+    
 }
