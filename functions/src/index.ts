@@ -34,14 +34,21 @@ app.get('/notifications/:address', async (req, res) => {
 app.get('/lens/image/:address', async (req, res) => {
     const address = req.params.address;
     const imageInfo = await fetchLensProfileImageByAddress(address);
-    res.status(200).send({
-        imageInfo: imageInfo,
-    })
+    
+    if (imageInfo === null){
+        res.status(404).send({
+            message: 'Not found',
+        })
+    } else{
+        res.status(200).send({
+            imageInfo: imageInfo,
+        })
+    }
 })
 
 app.get('/lens/followerInfo/:address', async (req, res) => {
     const address = req.params.address
-    const result = await getLensFollowInfo(address)
+    const result = await getLensFollowInfoByAddress(address)
     if (result === null) {
         res.status(404).send({
             messege: 'Not Found'
@@ -97,7 +104,7 @@ async function fetchLensProfileImageByAddress(userAddress: string) {
 }
 
 
-async function getLensFollowInfo(userAddress: string) {
+async function getLensFollowInfoByAddress(userAddress: string) {
     const lensClient = new LensClient({
         environment: production
     });
