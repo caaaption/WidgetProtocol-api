@@ -41,7 +41,14 @@ app.get('/lens/image/:address', async (req, res) => {
 
 app.get('/lens/followerInfo/:address', async (req, res) => {
     const address = req.params.address
-    res.status(200).send(await getLensFollowInfo(address))
+    const result = await getLensFollowInfo(address)
+    if (result === null) {
+        res.status(404).send({
+            messege: 'Not Found'
+        })
+    } else {
+        res.status(200).send(result)
+    }
 })
 
 
@@ -65,7 +72,6 @@ async function fetchNotifications(userAddress: string) {
         env: ENV.PROD,
     });
 
-    console.log(notifications);
     return notifications;
 }
 
@@ -82,7 +88,11 @@ async function fetchLensProfileImageByAddress(userAddress: string) {
             profileId: profileId
         },
      );
-     const imageInfo = profile?.picture
+
+     if (profile === null){
+        return null
+     }
+     const imageInfo = profile.picture
      return imageInfo
 }
 
@@ -102,14 +112,17 @@ async function getLensFollowInfo(userAddress: string) {
         },
      );
 
-     const totalFollowers = profile?.stats.totalFollowers
-     const totalFollowing = profile?.stats.totalFollowing
+     if (profile === null) {
+        return null
 
-    const followInfo = {
-        totalFollowers: totalFollowers,
-        totalFollowing: totalFollowing
-    }
+     }
+        const totalFollowers = profile.stats.totalFollowers
+        const totalFollowing = profile.stats.totalFollowing
 
-    return followInfo
-    
+        const followInfo = {
+            totalFollowers: totalFollowers,
+            totalFollowing: totalFollowing
+        }
+
+        return followInfo
 }
