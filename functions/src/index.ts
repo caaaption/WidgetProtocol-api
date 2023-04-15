@@ -6,11 +6,6 @@ import { LensClient, production } from "@lens-protocol/client";
 
 const ethers = require('ethers');
 const app: express.Express = express()
-app.get('/', async (req, res) => {
-  res.status(200).send({
-    message: 'Hello World!',
-  })
-})
 
 
 app.get('/nameOrAddress/:nameOrAddress', async (req, res) => {
