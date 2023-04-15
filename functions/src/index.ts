@@ -2,6 +2,8 @@ import express = require('express')
 import * as functions from 'firebase-functions'
 import * as PushAPI from "@pushprotocol/restapi";
 import { ENV } from "@pushprotocol/restapi/src/lib/constants";
+import { LensClient, production } from "@lens-protocol/client";
+
 const ethers = require('ethers');
 const app: express.Express = express()
 app.get('/', async (req, res) => {
@@ -9,6 +11,7 @@ app.get('/', async (req, res) => {
     message: 'Hello World!',
   })
 })
+
 
 app.get('/nameOrAddress/:nameOrAddress', async (req, res) => {
     const nameOrAddress = req.params.nameOrAddress;
@@ -33,6 +36,15 @@ app.get('/notifications/:address', async (req, res) => {
     })
 })
 
+app.get('/lens/image/:address', async (req, res) => {
+    const address = req.params.address;
+    const imageInfo = await fetchLensProfileImageByAddress(address);
+    res.status(200).send({
+        imageInfo: imageInfo,
+    })
+})
+
+
 
 exports.api = functions.region('asia-northeast1').https.onRequest(app)
 
@@ -55,4 +67,21 @@ async function fetchNotifications(userAddress: string) {
 
     console.log(notifications);
     return notifications;
+}
+
+async function fetchLensProfileImageByAddress(userAddress: string) {
+    const lensClient = new LensClient({
+        environment: production
+    });
+    const allOwnedProfiles = await lensClient.profile.fetchAll({
+        ownedBy: [userAddress],
+    });
+    const profileId = allOwnedProfiles.items[0].id;
+    const profile = await lensClient.profile.fetch(
+        {
+            profileId: profileId
+        },
+     );
+     const imageInfo = profile?.picture
+     return imageInfo
 }
